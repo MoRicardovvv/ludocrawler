@@ -8,15 +8,15 @@ import edu.uci.ics.crawler4j.robotstxt.RobotstxtServer;
 
 import java.io.File;
 
-public class Controller {
+public class ReviewsController {
     public static void main(String[] args) throws Exception {
 
         //aonde ficaram os dados dos jogos
-        File attributesStorageFolder = new File("D:/recommender-data-master/game-attributes");
-        File reviewsStorageFolder = new File("D:/recommender-data-master/game-reviews");
+        File storageFolder = new File("D:/recommender-data-master/game-reviews");
         //dados temporarios do crawler
-        String crawlStorageFolder = "./storage";
-
+        String crawlStorageFolder = "./reviews-storage";
+        //numero de threads
+        int numberOfCrawlers = 1; //threads
 
         CrawlConfig config = new CrawlConfig();
         config.setCrawlStorageFolder(crawlStorageFolder);
@@ -36,11 +36,11 @@ public class Controller {
 
 
         // The factory which creates instances of crawlers.
-        CrawlController.WebCrawlerFactory<SearchCrawler> attributeFactory = () -> new SearchCrawler(attributesStorageFolder);
+        CrawlController.WebCrawlerFactory<SearchCrawler> factory = () -> new SearchCrawler(storageFolder);
 
         // Start the crawl. This is a blocking operation, meaning that your code
         // will reach the line after this only when crawling is finished.
-        controller.startNonBlocking(attributeFactory, 1);
+        controller.start(factory, numberOfCrawlers);
     }
 
 }
