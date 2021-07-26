@@ -6,14 +6,13 @@ import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
-import org.json.JSONArray;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -57,7 +56,6 @@ public class SearchCrawler extends WebCrawler {
             if (url.startsWith("https://www.ludopedia.com.br/jogo/")) {
                 //salvar a imagem em ordem alfabetica e com nome = nome do jogo.
                 String nomeJogo = url.substring(34);
-                char inicial = nomeJogo.charAt(0);
                 //arquivo aonde será salvo o jogo
                 String finalPath = storageFolder.getPath() + "/" + nomeJogo + ".json";
 
@@ -71,43 +69,50 @@ public class SearchCrawler extends WebCrawler {
 
 
                     JSONObject gameData = new JSONObject();
-                    JSONArray reviewData = new JSONArray();
                     JSONArray mechanicsData = new JSONArray();
                     JSONArray domainsData = new JSONArray();
                     JSONArray categoriesData = new JSONArray();
                     JSONArray themesData = new JSONArray();
+                    JSONArray editorasData = new JSONArray();
 
 
                     //usar jsoup pra parsar o html
                     Document jogo = Jsoup.connect(url).get();
-                    Document avaliacoes = Jsoup.connect(url +"?v=avaliacoes").get();
 
-                    Elements avalicao = avaliacoes.getElementsByClass("speech");
-                    String score, user, comment;
-                    for (Element a : avalicao) {
-                        user = a.getElementsByClass("media-heading").text();
-                        comment = a.getElementsByClass("media-body").text();
-                        score = a.getElementsByClass("pull-right nota-comentario-header hidden-sm hidden-md hidden-lg").text();
-
-
-                        JSONObject temp = new JSONObject();
-                        temp.put("user", user);
-                        temp.put("comment", comment);
-                        temp.put("score", score);
-
-                        reviewData.put(temp);
+                    Elements attributes = jogo.getElementsByClass("mar-btm bg-gray-light pad-all");
+                    for (Element e : attributes.select("a[href]")) {
+                        String info = e.attr("abs:href");
+                        System.out.println(info);
+                        String a = info.substring(29);  //29
+                        if (a.startsWith("mecanica")) {
+                            mechanicsData.add(a.substring(9));
+                        } else if (a.startsWith("dominio")) {
+                            domainsData.add(a.substring(8));
+                        } else if (a.startsWith("categoria")) {
+                            categoriesData.add(a.substring(9));
+                        } else if (a.startsWith("tema")) {
+                            themesData.add(a.substring(5));
+                        } else if (a.startsWith("editora")) {
+                            String t = a.substring(8);
+                            for (int i = 0; i < t.length(); i++) {
+                                if (t.charAt(i) == '/') {
+                                    editorasData.add(t.substring(0, i));
+                                }
+                                break;
+                            }
+                        }
                     }
-                    gameData.put("reviews", reviewData);
-
-                    /*Elements attributes = jogo.getElementsByClass("mar-btm bg-gray-light pad-all");
-                    for (Element e : attributes) {
-
-                    }*/
-
-
+                    //atributos
+                    gameData.put("themes", themesData);
+                    gameData.put("categories", categoriesData);
+                    gameData.put("domains", domainsData);
+                    gameData.put("mechanics", mechanicsData);
+                    gameData.put("publishers", editorasData);
+                    //descricao
                     String description = jogo.getElementById("bloco-descricao-sm").text();
                     gameData.put("description", description);
-
+                    //nome
+                    gameData.put("name", nomeJogo);
 
                     System.out.println(gameData.toString());
                     /*
@@ -128,10 +133,7 @@ public class SearchCrawler extends WebCrawler {
                 } catch (Exception iox) {
                     WebCrawler.logger.error("Failed to write file: {}", finalPath, iox);
                 }
-
             }
         }
     }
-
-
 }

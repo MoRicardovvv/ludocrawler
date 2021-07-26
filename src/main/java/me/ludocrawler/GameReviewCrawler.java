@@ -1,19 +1,21 @@
 package me.ludocrawler;
 
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+
 import edu.uci.ics.crawler4j.crawler.Page;
 import edu.uci.ics.crawler4j.crawler.WebCrawler;
 import edu.uci.ics.crawler4j.parser.HtmlParseData;
 import edu.uci.ics.crawler4j.url.WebURL;
-import org.json.JSONArray;
-import org.json.JSONObject;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Pattern;
 
@@ -33,48 +35,62 @@ public class GameReviewCrawler extends WebCrawler {
         String origem = referringPage.getWebURL().getURL().toLowerCase();
         //so visitar paginas a partir do advanced search pra evitar expansoes
         return !FILTERS.matcher(href).matches()
-                && origem.startsWith("https://www.ludopedia.com.br/search_jogo?advsearch=true&fl_tp_jogo=1&s=1&pagina=")
-                && origem.startsWith("https://www.ludopedia.com.br/jogo/")
-                && (href.startsWith("https://www.ludopedia.com.br/search_jogo?advsearch=true&fl_tp_jogo=1&s=1&pagina=") ||
-                    href.contains("?v=avaliacoes&pagina=") ||
-                    href.startsWith("https://www.ludopedia.com.br/jogo/")
-                    );
-    }
 
+                && (origem.startsWith("https://www.ludopedia.com.br/search_jogo?advsearch=true&fl_tp_jogo=1&s=1&pagina=")
+                && href.startsWith("https://www.ludopedia.com.br/search_jogo?advsearch=true&fl_tp_jogo=1&s=1&pagina="))
+
+                || (origem.startsWith("https://www.ludopedia.com.br/search_jogo?advsearch=true&fl_tp_jogo=1&s=1&pagina=")
+                && href.startsWith("https://www.ludopedia.com.br/jogo/"))
+
+                || (origem.startsWith("https://www.ludopedia.com.br/jogo/")
+                && href.contains("?v=avaliacoes"))
+
+                || (origem.contains("?v=avaliacoes")
+                && href.contains("?v=avaliacoes"));
+    }
 
     @Override
     public void visit(Page page) {
         String url = page.getWebURL().getURL();
         System.out.println("URL: " + url);
 
-        if (url.startsWith(jogoPgInicial +"?v=avaliacoes")) {
+        if (url.contains("?v=avaliacoes")) {
             if (page.getParseData() instanceof HtmlParseData) {
 
                 //identificar o nome do jogo
-                String nomeJogo = jogoPgInicial.substring(34);
-                char inicial = nomeJogo.charAt(0);
-
-                String finalPath;
-                if (Character.isLetter(inicial)) {
-                    finalPath = "C:/Users/ricar/ludocrawler/data/" + inicial + "/" + nomeJogo + ".json";
-                } else {
-                    finalPath = "C:/Users/ricar/ludocrawler/data/123" + "/" + nomeJogo + ".json";
+                String unfinishedName = url.substring(34);
+                int nameEndIndex = unfinishedName.length();
+                for (int i = 0; i < unfinishedName.length(); i++) {
+                    char c = unfinishedName.charAt(i);
+                    if (c == '?') {
+                        nameEndIndex = i;
+                        break;
+                    }
                 }
+
+                String nomeJogo = unfinishedName.substring(0, nameEndIndex);
+                String finalPath = storageFolder.getPath() + '/' + nomeJogo + ".json";
+
                 //escrever
                 try {
-                    //create directory/file if not exists
+
+                    JSONObject reviewdata = new JSONObject();
+                    JSONArray reviews = new JSONArray();
+                    //the program must check if the reviewdata alredy exists in the file
                     File targetFile = new File(finalPath);
                     File parentDirectory = targetFile.getParentFile();
-                    if (!parentDirectory.exists()) {
-                        parentDirectory.mkdirs();
+                    if (!parentDirectory.exists()) {parentDirectory.mkdirs();}
+                    if (targetFile.exists()) {
+                        JSONParser jsonParser = new JSONParser();
+                        InputStreamReader fileReader = new InputStreamReader(new FileInputStream(targetFile), "utf-8");
+
+                        JSONObject oldData = (JSONObject) jsonParser.parse(fileReader);
+                        reviews.add(oldData.get("reviews"));
+
                     }
-                    if (!targetFile.exists()) {
+                    else {
                         targetFile.createNewFile();
                     }
-
-                    JSONObject data = new JSONObject();
-                    JSONArray reviewData = new JSONArray();
-
 
                     //usar jsoup pra parsar o html
                     Document avaliacoes = Jsoup.connect(url).get();
@@ -92,23 +108,20 @@ public class GameReviewCrawler extends WebCrawler {
                         temp.put("comment", comment);
                         temp.put("score", score);
 
-                        reviewData.put(temp);
+                        reviews.add(temp);
                     }
-                    data.put("name", nomeJogo);
-                    data.put("reviews", reviewData);
-
-
-                    System.out.println(data.toString());
-                    /*
-                    FileWriter writer = new FileWriter("finalPath");
-                    writer.write(game_data.toString());
-                    */
-
+                    reviewdata.put("reviews", reviews);
+                    reviewdata.put("name", nomeJogo);
+                    System.out.println(reviewdata.toString());
+                /*
+                FileWriter writer = new FileWriter("finalPath");
+                writer.write(game_data.toString());
+                */
 
                     //write in utf-8
                     OutputStreamWriter writer =
                             new OutputStreamWriter(new FileOutputStream(finalPath), StandardCharsets.UTF_8);
-                    writer.write(data.toString());
+                    writer.write(reviewdata.toString());
                     writer.close();
                     //Files.write(html.getBytes(), new File(finalPath));
                     WebCrawler.logger.info("Stored: {}", url);
@@ -117,9 +130,7 @@ public class GameReviewCrawler extends WebCrawler {
                 } catch (Exception iox) {
                     WebCrawler.logger.error("Failed to write file: {}", finalPath, iox);
                 }
-
             }
         }
-
     }
 }
