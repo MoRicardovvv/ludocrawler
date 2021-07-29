@@ -73,7 +73,6 @@ public class GameReviewCrawler extends WebCrawler {
 
                 //escrever
                 try {
-
                     JSONObject reviewdata = new JSONObject();
                     JSONArray reviews = new JSONArray();
                     //the program must check if the reviewdata alredy exists in the file
@@ -82,11 +81,14 @@ public class GameReviewCrawler extends WebCrawler {
                     if (!parentDirectory.exists()) {parentDirectory.mkdirs();}
                     if (targetFile.exists()) {
                         JSONParser jsonParser = new JSONParser();
-                        InputStreamReader fileReader = new InputStreamReader(new FileInputStream(targetFile), "utf-8");
-
+                        InputStreamReader fileReader =
+                                new InputStreamReader(new FileInputStream(targetFile), "utf-8");
                         JSONObject oldData = (JSONObject) jsonParser.parse(fileReader);
-                        reviews.add(oldData.get("reviews"));
-
+                        JSONArray oldDataReviewsArray = (JSONArray) oldData.get("reviews");
+                        for (Object o : oldDataReviewsArray) {
+                            reviews.add(o);
+                        }
+                        //reviews.add(oldData.get("reviews"));
                     }
                     else {
                         targetFile.createNewFile();

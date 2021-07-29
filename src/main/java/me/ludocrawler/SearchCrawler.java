@@ -89,16 +89,17 @@ public class SearchCrawler extends WebCrawler {
                         } else if (a.startsWith("dominio")) {
                             domainsData.add(a.substring(8));
                         } else if (a.startsWith("categoria")) {
-                            categoriesData.add(a.substring(9));
+                            categoriesData.add(a.substring(10));
                         } else if (a.startsWith("tema")) {
                             themesData.add(a.substring(5));
                         } else if (a.startsWith("editora")) {
                             String t = a.substring(8);
+                            //editorasData.add(t);
                             for (int i = 0; i < t.length(); i++) {
                                 if (t.charAt(i) == '/') {
                                     editorasData.add(t.substring(0, i));
+                                    break;
                                 }
-                                break;
                             }
                         }
                     }
@@ -109,7 +110,7 @@ public class SearchCrawler extends WebCrawler {
                     gameData.put("mechanics", mechanicsData);
                     gameData.put("publishers", editorasData);
                     //descricao
-                    String description = jogo.getElementById("bloco-descricao-sm").text();
+                    String description = jogo.getElementsByClass("col-xs-12 col-sm-9").text();
                     gameData.put("description", description);
                     //nome
                     gameData.put("name", nomeJogo);
