@@ -97,7 +97,7 @@ public class SearchCrawler extends WebCrawler {
                             //editorasData.add(t);
                             for (int i = 0; i < t.length(); i++) {
                                 if (t.charAt(i) == '/') {
-                                    editorasData.add(t.substring(0, i));
+                                    editorasData.add(t.substring(i+1, t.length()));
                                     break;
                                 }
                             }
