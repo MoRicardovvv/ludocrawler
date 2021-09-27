@@ -4,7 +4,7 @@ algumas inspirações/recursos:
 - [o Ludopédia](https://www.ludopedia.com.br/)
 
 ## sobre esse programa:
-Um crawler que navega que percorre o site/comunidade/forúm Ludopédia e salva os dados dos jogos em um arquivo json. Utiliza a biblioteca crawler4j. Você pode escolher o número de threads simultanêas.
+Um scraper que navega que percorre o site/comunidade/forúm Ludopédia e salva os dados dos jogos em um arquivo json. Utiliza a biblioteca crawler4j. Você pode escolher o número de threads simultanêas.
 
 Classes para percorrer os dados de usuário : INCOMPLETO
 
