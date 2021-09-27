@@ -44,13 +44,13 @@ public class Controller {
 
         // The factory which creates instances of crawlers.
         CrawlController.WebCrawlerFactory<SearchCrawler> attributeFactory = () -> new SearchCrawler(attributeStorageFolder);
-        CrawlController.WebCrawlerFactory<GameReviewCrawler> reviewFactory = () -> new GameReviewCrawler(reviewsStorageFolder);
-        CrawlController.WebCrawlerFactory<ProfileCrawler> profileFactory = () -> new ProfileCrawler(profileStorageFolder);
+        //CrawlController.WebCrawlerFactory<GameReviewCrawler> reviewFactory = () -> new GameReviewCrawler(reviewsStorageFolder);
+        //CrawlController.WebCrawlerFactory<ProfileCrawler> profileFactory = () -> new ProfileCrawler(profileStorageFolder);
         // Start the crawl. This is a blocking operation, meaning that your code
         // will reach the line after this only when crawling is finished.
-        //controller.start(attributeFactory, 1);
+        controller.start(attributeFactory, 1);
         //controller.start(reviewFactory, 1);
-        controller.start(profileFactory, 1);
+        //controller.start(profileFactory, 1);
     }
 
 }
