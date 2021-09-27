@@ -1,18 +1,14 @@
 #ludocrawler 
-algumas inspirações:
-- [esse guia](https://www.devmedia.com.br/desenvolvendo-um-crawler-com-crawler4j/32893)
+algumas inspirações/recursos:
 - [os guias do crawler4j](https://github.com/yasserg/crawler4j)
 - [o Ludopédia](https://www.ludopedia.com.br/)
 
 ## sobre esse programa:
-um crawler que navega que percorre o site/comunidade/forúm Ludopédia e extrai dados dos jogos
+Um crawler que navega que percorre o site/comunidade/forúm Ludopédia e salva os dados dos jogos em um arquivo json. Utiliza a biblioteca crawler4j. Você pode escolher o número de threads simultanêas.
 
-no momento, ele salva a página dos jogos integralmente como html, separados por ordem alfabética
-
-No futuro, salvara apenas as informações relevantes em json, pois seu objetivo é ser usado como base de dados para um sistema de jogos tabletop para grupos
+Classes para percorrer os dados de usuário : INCOMPLETO
 
 
 ### Porque usar a pesquisa avançada como seed para o crawler?
-A seed escolhide permite caminhar apenas pelos jogos base e filtrar expansões/acessórios 
+A seed escolhida permite caminhar apenas pelos jogos base e filtrar expansões/acessórios 
 
-### Tenha certeza que o diretório "data" está no *root* do ambiente. Ao contrário, resultará em erro.
